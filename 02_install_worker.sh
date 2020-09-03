@@ -28,7 +28,7 @@ unzip master.zip fishtest-master/worker/*
 pushd fishtest-master/worker
 # setup a virtual environment
 python3.exe -m venv "env"
-env/bin/python3.exe -m pip install --upgrade pip setuptools wheel
+#env/bin/python3.exe -m pip install --upgrade pip setuptools wheel
 env/bin/python3.exe -m pip install requests
 # write fishtest.cfg
 touch fish.exit

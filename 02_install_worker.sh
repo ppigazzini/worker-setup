@@ -1,12 +1,27 @@
 #!/bin/bash
 # install and configure fishtest worker
 
-# fishtest credentials, cores to be contributed
+# print CPU information
+cpu_model=$(grep "^model name" /proc/cpuinfo | sort | uniq | cut -d ':' -f 2)
+n_cpus=$( grep "^physical id" /proc/cpuinfo | sort | uniq | wc -l)
+online_cores=$(grep "^bogo" /proc/cpuinfo | wc -l)
+n_siblings=$(grep "^siblings" /proc/cpuinfo | sort | uniq | cut -d ':' -f 2)
+n_cpu_cores=$(grep "^cpu cores" /proc/cpuinfo | sort | uniq | cut -d ':' -f 2)
+total_siblings=$((${n_cpus} * ${n_siblings}))
+total_cpu_cores=$((${n_cpus} * ${n_cpu_cores}))
+printf "CPU model : ${cpu_model}\n"
+printf "CPU       : %3d  -  Online cores    : %3d\n" ${n_cpus} ${online_cores}
+printf "Siblings  : %3d  -  Total siblings  : %3d\n" ${n_siblings} ${total_siblings}
+printf "CPU cores : %3d  -  Total CPU cores : %3d\n" ${n_cpu_cores} ${total_cpu_cores}
+
+# read fishtest credentials and number of cores to be contributed
+echo
 echo "Write your fishtest username:"
 read usr_name
 echo "Write your fishtest password:"
 read usr_pwd
 echo "Write the number of cores to be contributed to fishtest:"
+echo "(max suggested 'Total CPU cores - 1')"
 read n_cores
 
 # update msys2 packages
@@ -31,9 +46,7 @@ python3.exe -m venv "env"
 env/bin/python3.exe -m pip install --upgrade pip setuptools wheel
 env/bin/python3.exe -m pip install requests
 # write fishtest.cfg
-touch fish.exit
-env/bin/python3.exe worker.py --concurrency "${n_cores}" "${usr_name}" "${usr_pwd}"
-rm fish.exit
+env/bin/python3.exe worker.py --only_config True --concurrency "${n_cores}" "${usr_name}" "${usr_pwd}"
 
 cat << EOF >> fishtest.cmd
 @echo off
